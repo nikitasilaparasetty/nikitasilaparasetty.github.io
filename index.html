@@ -3,15 +3,18 @@
 <head>
     <title>My Portfolio Game</title>
     <style>
-        /* Game styles */
         body {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
             margin: 0;
+            padding: 20px;
+            display: flex;
+            gap: 30px;
             background-color: #f0f0f0;
             font-family: Arial, sans-serif;
+            min-height: 100vh;
+        }
+
+        #game-container {
+            flex: 0 0 600px;
         }
 
         #game-area {
@@ -19,8 +22,29 @@
             height: 400px;
             background-color: white;
             border: 2px solid #333;
-            position: absolute;
+            position: relative;
         }
+
+        #info-panel {
+            flex: 1;
+            padding: 20px;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        #info-title {
+            font-size: 24px;
+            margin-bottom: 20px;
+            color: #333;
+        }
+
+        #info-content {
+            list-style-type: disc;
+            padding-left: 20px;
+            line-height: 1.6;
+        }
+
 
         #player {
             width: 30px;
@@ -72,10 +96,15 @@
     </style>
 </head>
 <body>
-    <div id="game-area">
-        <div id="instructions">Use arrow keys to move</div>
-        <div id="player"></div>
-        <div id="dialog"></div>
+    <div id="game-container">
+        <div id="game-area">
+            <div id="instructions">Use arrow keys to move</div>
+            <div id="player"></div>
+        </div>
+    </div>
+    <div id="info-panel">
+        <div id="info-title"></div>
+        <ul id="info-content"></ul>
     </div>
 
     <script>
@@ -108,7 +137,7 @@
                 img.alt = item.text;
                 
                 element.appendChild(img);
-                element.onclick = () => showDialog(item.text);
+                element.onclick = () => showDialog(item.title, item.details);
                 gameArea.appendChild(element);
             });
 
@@ -127,12 +156,18 @@
         }
 
         // Show dialog
-        function showDialog(text) {
-            dialog.textContent = text;
-            dialog.style.display = 'block';
-            setTimeout(() => {
-                dialog.style.display = 'none';
-            }, 3000);
+        function showDialog(title, details) {
+            const infoTitle = document.getElementById('info-title');
+            const infoContent = document.getElementById('info-content');
+            
+            infoTitle.textContent = title;
+            infoContent.innerHTML = ''; // Clear existing content
+            
+            details.forEach(detail => {
+                const li = document.createElement('li');
+                li.textContent = detail;
+                infoContent.appendChild(li);
+            });
         }
 
         // Move player with arrow keys
