@@ -32,16 +32,21 @@
 
         .item {
             position: absolute;
-            width: 50px;
-            height: 50px;
+            width: 50px;          /* Width of the container */
+            height: 50px;         /* Height of the container */
             border-radius: 5px;
             display: flex;
             align-items: center;
             justify-content: center;
-            color: white;
-            font-weight: bold;
             cursor: pointer;
-        }
+            }
+
+        .item img {
+            width: 100%;         /* Image fills container */
+            height: 100%;
+            object-fit: cover;   /* Maintains aspect ratio */
+            border-radius: 5px;
+            }
 
         #dialog {
             position: absolute;
@@ -87,19 +92,24 @@
             { x: 200, y: 50, color: '#4CAF50', text: '💻 My coding projects' },
             { x: 350, y: 50, color: '#2196F3', text: '🏆 My achievements' },
             { x: 500, y: 50, color: '#9C27B0', text: '📝 My blog posts' },
-            { x: 50, y: 300, img:'desk_1.png', text: '👔 My work experience' }
+            { x: 50, y: 300, image:'desk_1.png', text: '👔 My work experience' }
         ];
 
         // Create items in game area
         items.forEach(item => {
-            const element = document.createElement('div');
-            element.className = 'item';
-            element.style.left = item.x + 'px';
-            element.style.top = item.y + 'px';
-            element.style.backgroundColor = item.color;
-            element.onclick = () => showDialog(item.text);
-            gameArea.appendChild(element);
-        });
+                const element = document.createElement('div');
+                element.className = 'item';
+                element.style.left = item.x + 'px';
+                element.style.top = item.y + 'px';
+                
+                const img = document.createElement('img');
+                img.src = item.image;
+                img.alt = item.text;
+                
+                element.appendChild(img);
+                element.onclick = () => showDialog(item.text);
+                gameArea.appendChild(element);
+            });
 
         // Update player position
         function updatePlayer() {
