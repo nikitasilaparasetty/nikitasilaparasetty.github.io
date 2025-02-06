@@ -56,6 +56,7 @@
             background-image: url('Player1.PNG');
             background-size: contain;
             background-repeat: no-repeat;
+            z-index: 1000;
         }
 
         .item {
@@ -215,7 +216,7 @@
             items.forEach(item => {
                 const distance = Math.hypot(playerX - item.x, playerY - item.y);
                 if (distance < 50) {
-                    showDialog(item.text);
+                    showDialog(item.title, item.details);
                 }
             });
         }
