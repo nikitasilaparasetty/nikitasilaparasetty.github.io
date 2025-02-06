@@ -25,6 +25,19 @@
             background-color: white;
             border: 2px solid #333;
             position: relative;
+            overflow: hidden;
+        
+        }
+
+
+        #background-video {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            z-index: 0;
         }
 
         #info-panel {
@@ -93,6 +106,7 @@
             align-items: center;
             justify-content: center;
             cursor: pointer;
+            z-index: 1;
             }
 
         .item img {
@@ -122,12 +136,16 @@
             background-color: rgba(255, 255, 255, 0.9);
             padding: 10px;
             border-radius: 5px;
+            z-index: 1;
         }
     </style>
 </head>
 <body>
     <div id="game-container">
         <div id="game-area">
+            <video id="background-video" autoplay loop muted>
+                <source src="background.mp4" type="video/mp4">
+            </video>
             <div id="instructions">Use arrow keys to move</div>
             <div id="player"></div>
         </div>
@@ -139,6 +157,7 @@
         <div id="info-title"></div>
         <ul id="info-content"></ul>
     </div>
+    
 
     <script>
         // Game setup
