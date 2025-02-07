@@ -3,88 +3,29 @@
 <head>
     <title>My Portfolio Game</title>
     <style>
-        body {
+        body, html {
             margin: 0;
-            padding: 20px;
-            display: flex;
-            overflow: hidden; /* Hide scrollbars */
-            gap: 30px;
-            background-color: #f0f0f0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
             font-family: Arial, sans-serif;
-            min-height: 100vh;
-        }
-
-        #game-container {
-            flex: 0 0 600px;
         }
 
         #game-area {
-            padding: 50px;
-            width: 600px;
-            height: 600px;
-            background-color: white;
-            border: 2px solid #333;
+            width: 100vw;
+            height: 100vh;
             position: relative;
             overflow: hidden;
-        
         }
-
 
         #background-video {
             position: absolute;
-            top: 0;
-            left: 0;
             width: 100%;
             height: 100%;
             object-fit: cover;
             z-index: 0;
         }
-
-        #info-panel {
-            flex: 1;
-            padding: 20px;
-            background: white;
-            border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        }
-
-        #info-title {
-            font-size: 24px;
-            margin-bottom: 20px;
-            color: #333;
-        }
-
-        #info-content {
-            list-style-type: disc;
-            padding-left: 20px;
-            line-height: 1.6;
-        }
-
-
-        #info-panel h1 {
-            font-size: 28px;
-            margin-bottom: 10px;
-            text-align: center;
-        }
-
-        #info-panel h2 {
-            font-size: 20px;
-            color: #666;
-            margin-bottom: 15px;
-            text-align: center;
-        }
-
-        #info-panel blockquote {
-            font-style: italic;
-            color: #555;
-            border-left: 3px solid #ddd;
-            padding-left: 15px;
-            margin-bottom: 30px;
-            text-align: center;
-        }
-
-
-        
 
         #player {
             width: 60px;
@@ -99,33 +40,58 @@
 
         .item {
             position: absolute;
-            width: 200px;          /* Width of the container */
-            height: 200px;         /* Height of the container */
+            width: 200px;
+            height: 200px;
             border-radius: 5px;
             display: flex;
             align-items: center;
             justify-content: center;
             cursor: pointer;
             z-index: 1;
-            }
+        }
 
         .item img {
-            width: 100%;         /* Image fills container */
+            width: 100%;
             height: 100%;
-            object-fit: cover;   /* Maintains aspect ratio */
+            object-fit: cover;
             border-radius: 5px;
-            }
+        }
 
-        #dialog {
-            position: absolute;
-            bottom: 20px;
+        #info-dialog {
+            position: fixed;
+            top: 50%;
             left: 50%;
-            transform: translateX(-50%);
-            background-color: white;
-            padding: 15px;
-            border: 2px solid #333;
-            border-radius: 5px;
+            transform: translate(-50%, -50%);
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 15px rgba(0,0,0,0.3);
+            z-index: 2000;
+            max-width: 600px;
+            width: 90%;
             display: none;
+        }
+
+        #info-dialog h1 {
+            font-size: 28px;
+            margin-bottom: 10px;
+            text-align: center;
+        }
+
+        #info-content {
+            list-style-type: disc;
+            padding-left: 20px;
+            line-height: 1.6;
+        }
+
+        #close-button {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            border: none;
+            background: none;
+            font-size: 20px;
+            cursor: pointer;
         }
 
         #instructions {
@@ -141,37 +107,32 @@
     </style>
 </head>
 <body>
-    <div id="game-container">
-        <div id="game-area">
-            <video id="background-video" autoplay loop muted>
-                <source src="background2.mp4" type="video/mp4">
-            </video>
-            <div id="instructions">Use arrow keys to move</div>
-            <div id="player"></div>
-        </div>
+    <div id="game-area">
+        <video id="background-video" autoplay loop muted>
+            <source src="background2.mp4" type="video/mp4">
+        </video>
+        <div id="instructions">Use arrow keys to move</div>
+        <div id="player"></div>
     </div>
-    <div id="info-panel">
-        <h1>Your Name</h1>
-        <h2>Your Tagline</h2>
-        <blockquote> Data is not just a puddle of monotonous figures, but an ocean of enormous opportunities. </blockquote>
-        <div id="info-title"></div>
+
+    <div id="info-dialog">
+        <button id="close-button">×</button>
+        <h1 id="info-title"></h1>
         <ul id="info-content"></ul>
     </div>
-    
 
     <script>
-        // Game setup
         const player = document.getElementById('player');
         const gameArea = document.getElementById('game-area');
-        const dialog = document.getElementById('dialog');
+        const infoDialog = document.getElementById('info-dialog');
+        const closeButton = document.getElementById('close-button');
         let playerX = 100;
         let playerY = 100;
 
-        // Create interactive items
         const items = [
             {
-                x: 80,
-                y: 80,
+                x: "10%",
+                y: "15%",
                 image: 'fitness2.PNG',
                 title: '🔨 Skills',
                 details: [
@@ -181,8 +142,8 @@
                 ]
             },
             {
-                x: 400,
-                y: 80,
+                x: "70%",
+                y: "15%",
                 image: 'warehouse2.PNG',
                 title: '💻 My Projects',
                 details: [
@@ -192,8 +153,8 @@
                 ]
             },
             {
-                x: 80,
-                y: 300,
+                x: "10%",
+                y: "45%",
                 image: 'office2.PNG',
                 title: '💼 Work Experience',
                 details: [
@@ -203,8 +164,8 @@
                 ]
             },
             {
-                x: 400,
-                y: 300,
+                x: "70%",
+                y: "45%",
                 image: 'library2.PNG',
                 title: '📚 Publications and Research',
                 details: [
@@ -214,10 +175,10 @@
                 ]
             },
             {
-                x: 80,
-                y: 500,
+                x: "10%",
+                y: "75%",
                 image: 'university_3.PNG',
-                title: '📝 My Education and Certifications',
+                title: '📝 Education and Certifications',
                 details: [
                     'Ed 1 details',
                     'Ed 2 details',
@@ -225,66 +186,61 @@
                 ]
             },
             {
-                x: 400,
-                y: 500,
+                x: "70%",
+                y: "75%",
                 image: 'museum2.PNG',
-                title: '🏆 Other Achievements and Other Links',
+                title: '🏆 Achievements and Links',
                 details: [
                     'AnL 1 details',
                     'AnL 2 details',
                     'AnL 3 details'
                 ]
-            },
-            
+            }
         ];
 
-        // Create items in game area
         items.forEach(item => {
-                const element = document.createElement('div');
-                element.className = 'item';
-                element.style.left = item.x + 'px';
-                element.style.top = item.y + 'px';
-                
-                const img = document.createElement('img');
-                img.src = item.image;
-                img.alt = item.text;
-                
-                element.appendChild(img);
-                element.onclick = () => showDialog(item.title, item.details);
-                gameArea.appendChild(element);
-            });
+            const element = document.createElement('div');
+            element.className = 'item';
+            element.style.left = item.x;
+            element.style.top = item.y;
+            
+            const img = document.createElement('img');
+            img.src = item.image;
+            img.alt = item.title;
+            
+            element.appendChild(img);
+            element.onclick = () => showDialog(item.title, item.details);
+            gameArea.appendChild(element);
+        });
 
-        // Update player position
-        function updatePlayer() {
-            player.style.left = playerX + 'px';
-            player.style.top = playerY + 'px';
-
-            // Check for nearby items
-            items.forEach(item => {
-                const distance = Math.hypot(playerX - item.x, playerY - item.y);
-                if (distance < 50) {
-                    showDialog(item.title, item.details);
-                }
-            });
-        }
-
-        // Show dialog
-       function showDialog(title, details) {
+        function showDialog(title, details) {
             const infoTitle = document.getElementById('info-title');
             const infoContent = document.getElementById('info-content');
             
             infoTitle.textContent = title;
-            infoContent.innerHTML = ''; // Clear existing content
+            infoContent.innerHTML = '';
             
             details.forEach(detail => {
                 const li = document.createElement('li');
                 li.textContent = detail;
                 infoContent.appendChild(li);
             });
+
+            infoDialog.style.display = 'block';
         }
 
-        // Move player with arrow keys
+        function closeDialog() {
+            infoDialog.style.display = 'none';
+        }
+
+        closeButton.onclick = closeDialog;
+
         document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                closeDialog();
+                return;
+            }
+
             const STEP = 10;
             const MAX_X = gameArea.offsetWidth - player.offsetWidth;
             const MAX_Y = gameArea.offsetHeight - player.offsetHeight;
@@ -306,7 +262,26 @@
             updatePlayer();
         });
 
-        // Initial player position
+        function updatePlayer() {
+            player.style.left = playerX + 'px';
+            player.style.top = playerY + 'px';
+
+            items.forEach(item => {
+                const itemElement = document.querySelector(`[src="${item.image}"]`).parentElement;
+                const itemRect = itemElement.getBoundingClientRect();
+                const playerRect = player.getBoundingClientRect();
+                
+                const distance = Math.hypot(
+                    (playerRect.left + playerRect.width/2) - (itemRect.left + itemRect.width/2),
+                    (playerRect.top + playerRect.height/2) - (itemRect.top + itemRect.height/2)
+                );
+                
+                if (distance < 100) {
+                    showDialog(item.title, item.details);
+                }
+            });
+        }
+
         updatePlayer();
     </script>
 </body>
