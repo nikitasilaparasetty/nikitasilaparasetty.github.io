@@ -69,19 +69,50 @@
             z-index: 2000;
             max-width: 600px;
             width: 90%;
+            max-height: 80vh;
+            overflow-y: auto;
             display: none;
         }
 
         #info-dialog h1 {
             font-size: 28px;
-            margin-bottom: 10px;
+            margin-bottom: 20px;
             text-align: center;
         }
 
-        #info-content {
+        #info-content h2 {
+            font-size: 20px;
+            margin-top: 25px;
+            margin-bottom: 10px;
+            color: #333;
+            border-bottom: 2px solid #007acc;
+            padding-bottom: 5px;
+        }
+
+        #info-content h3 {
+            font-size: 16px;
+            margin-top: 20px;
+            margin-bottom: 8px;
+            color: #555;
+        }
+
+        #info-content p {
+            line-height: 1.6;
+            margin-bottom: 15px;
+            text-align: justify;
+        }
+
+        #info-content ul {
             list-style-type: disc;
             padding-left: 20px;
             line-height: 1.6;
+            margin-bottom: 15px;
+        }
+
+        #info-content ol {
+            padding-left: 20px;
+            line-height: 1.6;
+            margin-bottom: 15px;
         }
 
         #close-button {
@@ -118,7 +149,7 @@
     <div id="info-dialog">
         <button id="close-button">×</button>
         <h1 id="info-title"></h1>
-        <ul id="info-content"></ul>
+        <div id="info-content"></div>
     </div>
 
     <script>
@@ -135,19 +166,35 @@
                 y: "12%",
                 image: 'fitness2.PNG',
                 title: '🔨 Skills (Technical & Non-Technical)',
-                details: [
-                    'PYTHON PROGRAMMING: Pandas, NumPy, SciPy, Matplotlib, Seaborn, Scikit-learn, TensorFlow, Keras, LlamaIndex, CrewAI',
-                    'DATA SCIENCE, MACHINE LEARNING, DEEP LEARNING: Exploratory Data Analysis, Regression, Classification, Forecasting, Clustering, CNNs for Computer Vision',
-                    'GENERATIVE AI: Prompt Engineering, Model Finetuning, RAG, AI Agents and Agentic AI, Working with LLMs like Gemini, ChatGPT, Claude AI, and Perplexity AI',
-                    'PROGRAM MANAGEMENT: Jira, Trello, Scrum, Agile, Lean Six Sigma',
-                    'RESEARCH: Research Design & Methodology, Hypothesis Formulation and Testing',
-                    
-                    'Oral and Written Communication', 
-                    'Problem Solving and Analytical Skills', 
-                    'Adaptability and Multi-Tasking',
-                    'Cross-Functional Team Collaboration and Stakeholder Engagement',
-                    'Leadership and Time Management'
-
+                content: [
+                    {
+                        type: 'heading2',
+                        text: 'Technical Skills'
+                    },
+                    {
+                        type: 'list',
+                        items: [
+                            'PYTHON PROGRAMMING: Pandas, NumPy, SciPy, Matplotlib, Seaborn, Scikit-learn, TensorFlow, Keras, LlamaIndex, CrewAI',
+                            'DATA SCIENCE, MACHINE LEARNING, DEEP LEARNING: Exploratory Data Analysis, Regression, Classification, Forecasting, Clustering, CNNs for Computer Vision',
+                            'GENERATIVE AI: Prompt Engineering, Model Finetuning, RAG, AI Agents and Agentic AI, Working with LLMs like Gemini, ChatGPT, Claude AI, and Perplexity AI',
+                            'PROGRAM MANAGEMENT: Jira, Trello, Scrum, Agile, Lean Six Sigma',
+                            'RESEARCH: Research Design & Methodology, Hypothesis Formulation and Testing'
+                        ]
+                    },
+                    {
+                        type: 'heading2',
+                        text: 'Non-Technical Skills'
+                    },
+                    {
+                        type: 'list',
+                        items: [
+                            'Oral and Written Communication',
+                            'Problem Solving and Analytical Skills',
+                            'Adaptability and Multi-Tasking',
+                            'Cross-Functional Team Collaboration and Stakeholder Engagement',
+                            'Leadership and Time Management'
+                        ]
+                    }
                 ]
             },
             {
@@ -155,10 +202,27 @@
                 y: "12%",
                 image: 'warehouse2.PNG',
                 title: '💻 My Projects',
-                details: [
-                    'Project 1 details',
-                    'Project 2 details',
-                    'Project 3 details'
+                content: [
+                    {
+                        type: 'paragraph',
+                        text: 'Here are some of my key projects that demonstrate my technical skills and problem-solving abilities:'
+                    },
+                    {
+                        type: 'heading3',
+                        text: 'Project 1'
+                    },
+                    {
+                        type: 'paragraph',
+                        text: 'Project 1 details and description...'
+                    },
+                    {
+                        type: 'heading3',
+                        text: 'Project 2'
+                    },
+                    {
+                        type: 'paragraph',
+                        text: 'Project 2 details and description...'
+                    }
                 ]
             },
             {
@@ -166,13 +230,31 @@
                 y: "40%",
                 image: 'office2.PNG',
                 title: '💼 Work Experience (Details on Request)',
-                details: [
-                    'TECHNICAL PROGRAM MANAGER | USA | MAY 2021 - PRESENT',
-                    'Led the end-to-end planning and preparation for IT corporate training programs, collaborating cross-functionally between multiple stakeholders, proposing and supporting the innovation and automation of several operations, supporting the integration of AI within company processes, supported the onboarding and continuous mentoring of new-hires, developed and maintained technical documentation.', 
-                    'UNIVERSITY ALUMNUS AMBASSADOR (PART-TIME) | UK | JUNE 2025 - PRESENT',
-                    'Recently onboarded to mentor and assist prospective students through virtual and in-person outreach efforts such as educational fairs, college talks, and one-to-one support',
-                    'DATA SCIENCE AND MACHINE LEARNING INTERN | INDIA | APRIL-JUNE, 2017',
-                    'Led a team in the research and oresentation of the application of AI for humanitarian impact, and developed 2 AI-powered prototypes.'
+                content: [
+                    {
+                        type: 'heading2',
+                        text: 'TECHNICAL PROGRAM MANAGER | USA | MAY 2021 - PRESENT'
+                    },
+                    {
+                        type: 'paragraph',
+                        text: 'Led the end-to-end planning and preparation for IT corporate training programs, collaborating cross-functionally between multiple stakeholders, proposing and supporting the innovation and automation of several operations, supporting the integration of AI within company processes, supported the onboarding and continuous mentoring of new-hires, developed and maintained technical documentation.'
+                    },
+                    {
+                        type: 'heading2',
+                        text: 'UNIVERSITY ALUMNUS AMBASSADOR (PART-TIME) | UK | JUNE 2025 - PRESENT'
+                    },
+                    {
+                        type: 'paragraph',
+                        text: 'Recently onboarded to mentor and assist prospective students through virtual and in-person outreach efforts such as educational fairs, college talks, and one-to-one support'
+                    },
+                    {
+                        type: 'heading2',
+                        text: 'DATA SCIENCE AND MACHINE LEARNING INTERN | INDIA | APRIL-JUNE, 2017'
+                    },
+                    {
+                        type: 'paragraph',
+                        text: 'Led a team in the research and presentation of the application of AI for humanitarian impact, and developed 2 AI-powered prototypes.'
+                    }
                 ]
             },
             {
@@ -180,10 +262,19 @@
                 y: "20%",
                 image: 'library2.PNG',
                 title: '📚 Publications and Research',
-                details: [
-                    'PnR 1 details',
-                    'PnR 2 details',
-                    'PnR 3 details'
+                content: [
+                    {
+                        type: 'paragraph',
+                        text: 'My research and publications focus on data science applications and AI innovations:'
+                    },
+                    {
+                        type: 'ordered_list',
+                        items: [
+                            'Publication 1 details',
+                            'Publication 2 details',
+                            'Research 3 details'
+                        ]
+                    }
                 ]
             },
             {
@@ -191,14 +282,31 @@
                 y: "60%",
                 image: 'university_3.PNG',
                 title: '📝 Education and Certifications (Details on Request)',
-                details: [
-                    'MSc in Data Science | UK | Distinction',
-                    'BSc in Mathematics and Statistics | India | First Class',
-                    'PCEP - Certified Entry Level Python Programmer (OpenEDG Python Institute)',
-                    'Introduction to Generative AI (Google)',
-                    'Machine Learning (Stanford University)',
-                    'Neural Networks and Deep Learning (deeplearning.ai)'
-                    
+                content: [
+                    {
+                        type: 'heading2',
+                        text: 'Education'
+                    },
+                    {
+                        type: 'list',
+                        items: [
+                            'MSc in Data Science | UK | Distinction',
+                            'BSc in Mathematics and Statistics | India | First Class'
+                        ]
+                    },
+                    {
+                        type: 'heading2',
+                        text: 'Certifications'
+                    },
+                    {
+                        type: 'list',
+                        items: [
+                            'PCEP - Certified Entry Level Python Programmer (OpenEDG Python Institute)',
+                            'Introduction to Generative AI (Google)',
+                            'Machine Learning (Stanford University)',
+                            'Neural Networks and Deep Learning (deeplearning.ai)'
+                        ]
+                    }
                 ]
             },
             {
@@ -206,10 +314,23 @@
                 y: "50%",
                 image: 'museum2.PNG',
                 title: '🏆 Achievements and Links',
-                details: [
-                    'AnL 1 details',
-                    'AnL 2 details',
-                    'AnL 3 details'
+                content: [
+                    {
+                        type: 'heading2',
+                        text: 'Key Achievements'
+                    },
+                    {
+                        type: 'paragraph',
+                        text: 'Throughout my career, I have been recognized for excellence in various domains:'
+                    },
+                    {
+                        type: 'list',
+                        items: [
+                            'Achievement 1 details',
+                            'Achievement 2 details',
+                            'Link 3 details'
+                        ]
+                    }
                 ]
             }
         ];
@@ -225,21 +346,60 @@
             img.alt = item.title;
             
             element.appendChild(img);
-            element.onclick = () => showDialog(item.title, item.details);
+            element.onclick = () => showDialog(item.title, item.content);
             gameArea.appendChild(element);
         });
 
-        function showDialog(title, details) {
+        function showDialog(title, content) {
             const infoTitle = document.getElementById('info-title');
             const infoContent = document.getElementById('info-content');
             
             infoTitle.textContent = title;
             infoContent.innerHTML = '';
             
-            details.forEach(detail => {
-                const li = document.createElement('li');
-                li.textContent = detail;
-                infoContent.appendChild(li);
+            content.forEach(block => {
+                let element;
+                
+                switch(block.type) {
+                    case 'heading2':
+                        element = document.createElement('h2');
+                        element.textContent = block.text;
+                        break;
+                    
+                    case 'heading3':
+                        element = document.createElement('h3');
+                        element.textContent = block.text;
+                        break;
+                    
+                    case 'paragraph':
+                        element = document.createElement('p');
+                        element.textContent = block.text;
+                        break;
+                    
+                    case 'list':
+                        element = document.createElement('ul');
+                        block.items.forEach(item => {
+                            const li = document.createElement('li');
+                            li.textContent = item;
+                            element.appendChild(li);
+                        });
+                        break;
+                    
+                    case 'ordered_list':
+                        element = document.createElement('ol');
+                        block.items.forEach(item => {
+                            const li = document.createElement('li');
+                            li.textContent = item;
+                            element.appendChild(li);
+                        });
+                        break;
+                    
+                    default:
+                        element = document.createElement('p');
+                        element.textContent = block.text || 'Invalid content type';
+                }
+                
+                infoContent.appendChild(element);
             });
 
             infoDialog.style.display = 'block';
@@ -293,7 +453,7 @@
                 );
                 
                 if (distance < 100) {
-                    showDialog(item.title, item.details);
+                    showDialog(item.title, item.content);
                 }
             });
         }
