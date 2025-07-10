@@ -135,6 +135,32 @@
             border-radius: 5px;
             z-index: 1;
         }
+
+        #interaction-hint {
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: rgba(0, 122, 204, 0.9);
+            color: white;
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-size: 14px;
+            display: none;
+            z-index: 1;
+            animation: pulse 1.5s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 0.7; }
+            50% { opacity: 1; }
+        }
+
+        .item.nearby {
+            box-shadow: 0 0 20px rgba(255, 255, 0, 0.8);
+            transform: scale(1.05);
+            transition: all 0.3s ease;
+        }
     </style>
 </head>
 <body>
@@ -142,7 +168,8 @@
         <video id="background-video" autoplay loop muted>
             <source src="background4.mp4" type="video/mp4">
         </video>
-        <div id="instructions">Use Arrow Keys to move and Esc to close a dialog box</div>
+        <div id="instructions">Use Arrow Keys to move, Click locations or press Enter when near them</div>
+        <div id="interaction-hint">Press Enter to interact!</div>
         <div id="player"></div>
     </div>
 
@@ -157,8 +184,10 @@
         const gameArea = document.getElementById('game-area');
         const infoDialog = document.getElementById('info-dialog');
         const closeButton = document.getElementById('close-button');
+        const interactionHint = document.getElementById('interaction-hint');
         let playerX = 100;
         let playerY = 100;
+        let nearbyItem = null;
 
         const items = [
             {
@@ -417,6 +446,11 @@
                 return;
             }
 
+            if (e.key === 'Enter' && nearbyItem) {
+                showDialog(nearbyItem.title, nearbyItem.content);
+                return;
+            }
+
             const STEP = 10;
             const MAX_X = gameArea.offsetWidth - player.offsetWidth;
             const MAX_Y = gameArea.offsetHeight - player.offsetHeight;
@@ -442,6 +476,9 @@
             player.style.left = playerX + 'px';
             player.style.top = playerY + 'px';
 
+            // Check for nearby items and provide visual feedback
+            let foundNearbyItem = null;
+            
             items.forEach(item => {
                 const itemElement = document.querySelector(`[src="${item.image}"]`).parentElement;
                 const itemRect = itemElement.getBoundingClientRect();
@@ -453,9 +490,20 @@
                 );
                 
                 if (distance < 100) {
-                    showDialog(item.title, item.content);
+                    foundNearbyItem = item;
+                    itemElement.classList.add('nearby');
+                } else {
+                    itemElement.classList.remove('nearby');
                 }
             });
+            
+            // Update nearby item and interaction hint
+            nearbyItem = foundNearbyItem;
+            if (nearbyItem) {
+                interactionHint.style.display = 'block';
+            } else {
+                interactionHint.style.display = 'none';
+            }
         }
 
         updatePlayer();
