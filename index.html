@@ -6,6 +6,9 @@
 <title>Nikita's Interactive Portfolio</title>
 <style>
   * { box-sizing: border-box; }
+  :root {
+    --app-height: 100vh;
+  }
   body, html {
     margin: 0;
     padding: 0;
@@ -17,7 +20,8 @@
 
   #game-area {
     width: 100vw;
-    height: 100vh;
+    height: var(--app-height);
+    height: 100dvh;
     position: relative;
     overflow: hidden;
     background: #cfe8f5;
@@ -33,13 +37,13 @@
   .sky {
     position: absolute;
     top: 0; left: 0; right: 0;
-    height: 62%;
+    height: 55%;
     background: linear-gradient(to bottom, #6fb3e0 0%, #bfe1f2 70%, #eaf6e6 100%);
   }
   .ground {
     position: absolute;
     bottom: 0; left: 0; right: 0;
-    height: 42%;
+    height: 50%;
     background: linear-gradient(to bottom, #8fc76b 0%, #6ea852 100%);
   }
   .sun {
@@ -79,8 +83,8 @@
   .river-wrap {
     position: absolute;
     left: 0; right: 0;
-    top: 60%;
-    height: 9%;
+    top: 64%;
+    height: 7%;
     z-index: 1;
   }
   .river-wrap svg { width: 100%; height: 100%; display: block; }
@@ -177,7 +181,7 @@
   /* ============================= BUILDINGS ============================= */
   .item {
     position: absolute;
-    width: clamp(90px, 13vw, 165px);
+    width: clamp(68px, 15vw, 145px);
     aspect-ratio: 100 / 120;
     cursor: pointer;
     z-index: 2;
@@ -562,6 +566,17 @@
   </div>
 
 <script>
+  /* Robust mobile viewport-height fix: some browsers report 100vh as if the
+     address bar were hidden, cutting off content at the bottom. This keeps
+     an accurate pixel value in sync, and modern browsers additionally get
+     the native 100dvh override set in CSS above. */
+  function setAppHeight() {
+    document.documentElement.style.setProperty('--app-height', window.innerHeight + 'px');
+  }
+  setAppHeight();
+  window.addEventListener('resize', setAppHeight);
+  window.addEventListener('orientationchange', setAppHeight);
+
   /* ============================= PLAYER SVG (chosen style: detailed vector, fuller hair + stylish glasses) ============================= */
   const playerSVG = `
   <svg viewBox="0 0 70 118">
@@ -755,7 +770,7 @@
   /* ============================= CONTENT DATA (unchanged text, now tied to buildingSVGs) ============================= */
   const items = [
     {
-      x: "4%", bottom: "8%", building: 'gym',
+      x: "10%", bottom: "9%", building: 'gym',
       title: '🔨 Skills (Technical & Non-Technical)',
       content: [
         { type: 'heading2', text: 'Technical Skills' },
@@ -777,7 +792,7 @@
       ]
     },
     {
-      x: "20%", bottom: "8%", building: 'tech',
+      x: "68%", bottom: "9%", building: 'tech',
       title: '💻 My Projects',
       content: [
         { type: 'paragraph', text: 'Here are some of my key projects that demonstrate my technical skills:' },
@@ -793,7 +808,7 @@
       ]
     },
     {
-      x: "36%", bottom: "6%", building: 'office',
+      x: "38%", bottom: "9%", building: 'office',
       title: '💼 Work Experience (Details on Request)',
       content: [
         { type: 'heading2', text: 'TECHNICAL PROGRAM MANAGER | USA | MAY 2021 - PRESENT' },
@@ -805,7 +820,7 @@
       ]
     },
     {
-      x: "54%", bottom: "9%", building: 'library',
+      x: "12%", bottom: "41%", building: 'library',
       title: '📚 Publications and Research Experience',
       content: [
         { type: 'paragraph', text: 'My research and publications focus on data science applications and AI innovations:' },
@@ -828,7 +843,7 @@
       ]
     },
     {
-      x: "70%", bottom: "7%", building: 'university',
+      x: "42%", bottom: "41%", building: 'university',
       title: '📝 Education and Certifications (Details on Request)',
       content: [
         { type: 'heading2', text: 'Education' },
@@ -846,7 +861,7 @@
       ]
     },
     {
-      x: "85%", bottom: "8%", building: 'museum',
+      x: "72%", bottom: "41%", building: 'museum',
       title: '🏆 Achievements and Links',
       content: [
         { type: 'heading2', text: 'Key Achievements' },
@@ -867,8 +882,8 @@
   const closeButton = document.getElementById('close-button');
   const interactionHint = document.getElementById('interaction-hint');
 
-  let playerX = 100;
-  let playerY = 100;
+  let playerX = Math.max(0, gameArea.offsetWidth * 0.42);
+  let playerY = Math.max(0, gameArea.offsetHeight * 0.68);
   let facing = 'right';
   let nearbyItem = null;
 
