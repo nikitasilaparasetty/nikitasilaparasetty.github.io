@@ -192,6 +192,22 @@
     filter: drop-shadow(0 0 14px rgba(255, 230, 100, 0.9));
     transform: scale(1.05);
   }
+  .building-label {
+    position: absolute;
+    top: -10%;
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(255, 255, 255, 0.88);
+    color: #222;
+    font-size: clamp(9px, 1.6vw, 12px);
+    font-weight: bold;
+    padding: 2px 8px;
+    border-radius: 10px;
+    white-space: nowrap;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.25);
+    pointer-events: none;
+    z-index: 3;
+  }
   .door {
     transform-box: fill-box;
     transform-origin: left center;
@@ -218,16 +234,16 @@
   }
   #player .v-leg-l, #player .v-leg-r {
     transform-origin: 50% 0%;
-    animation: walkLegs 0.5s infinite alternate ease-in-out;
+    animation: walkLegs 0.45s infinite ease-in-out;
     animation-play-state: paused;
   }
-  #player .v-leg-r { animation-delay: 0.25s; }
+  #player .v-leg-r { animation-delay: 0.225s; }
   #player.walking .v-leg-l, #player.walking .v-leg-r {
     animation-play-state: running;
   }
   @keyframes walkLegs {
-    from { transform: rotate(-16deg); }
-    to { transform: rotate(16deg); }
+    0%, 100% { transform: translateY(0) scaleY(1); }
+    50% { transform: translateY(-4px) scaleY(0.94); }
   }
 
   /* ============================= UI ============================= */
@@ -331,46 +347,42 @@
   #touch-controls {
     display: none;
     position: absolute;
-    bottom: 14px;
-    left: 14px;
+    bottom: 8px;
+    left: 8px;
     z-index: 6;
-    grid-template-columns: repeat(3, 48px);
-    grid-template-rows: repeat(2, 48px);
-    gap: 4px;
+    gap: 6px;
   }
   #touch-controls button {
+    width: 46px;
+    height: 46px;
     border: none;
     border-radius: 8px;
     background: rgba(44, 62, 80, 0.75);
     color: white;
-    font-size: 18px;
+    font-size: 16px;
     touch-action: manipulation;
   }
   #touch-controls button:active { background: rgba(44, 62, 80, 0.95); }
-  #btn-up { grid-column: 2; grid-row: 1; }
-  #btn-left { grid-column: 1; grid-row: 2; }
-  #btn-down { grid-column: 2; grid-row: 2; }
-  #btn-right { grid-column: 3; grid-row: 2; }
 
   #btn-interact {
     display: none;
     position: absolute;
-    bottom: 24px;
-    right: 20px;
+    bottom: 8px;
+    right: 8px;
     z-index: 6;
-    width: 64px;
-    height: 64px;
+    width: 54px;
+    height: 54px;
     border-radius: 50%;
     border: none;
     background: rgba(0, 122, 204, 0.9);
     color: white;
-    font-size: 13px;
+    font-size: 12px;
     font-weight: bold;
     touch-action: manipulation;
   }
 
   @media (pointer: coarse) {
-    #touch-controls { display: grid; }
+    #touch-controls { display: flex; }
     #btn-interact { display: block; }
   }
 </style>
@@ -465,19 +477,31 @@
         </svg>
       </div>
 
-      <!-- walking animal (fox) -->
+      <!-- walking fox -->
       <div class="animal">
-        <svg viewBox="0 0 70 40">
-          <path d="M8 26 Q4 14 16 12 L50 12 Q62 12 60 24 L58 28 Q52 22 44 24 L20 24 Q14 30 8 26 Z" fill="#d9722c"/>
-          <polygon points="12,13 6,4 16,10" fill="#d9722c"/>
-          <polygon points="9,10 7,5 12,9" fill="#f5e6d3"/>
-          <path d="M58 24 Q68 18 66 8 Q62 12 60 20 Z" fill="#d9722c"/>
-          <path d="M62 10 Q66 12 66 8" fill="none" stroke="#f5e6d3" stroke-width="2"/>
+        <svg viewBox="0 0 70 42">
+          <!-- tail -->
+          <path d="M56 26 Q68 20 65 8 Q60 12 57 22 Z" fill="#d9722c"/>
+          <path d="M62 12 Q66 13 65 9" fill="none" stroke="#f5e6d3" stroke-width="2.4" stroke-linecap="round"/>
+          <!-- body -->
+          <path d="M8 27 Q4 16 16 14 L46 14 Q58 14 57 25 L55 29 Q49 23 41 25 L20 25 Q14 31 8 27 Z" fill="#d9722c"/>
+          <!-- chest/belly patch -->
+          <path d="M18 24 Q24 28 32 24 L30 26 Q22 29 18 26 Z" fill="#f5e6d3"/>
+          <!-- ears -->
+          <polygon points="14,15 8,4 18,11" fill="#d9722c"/>
+          <polygon points="11,11 9,6 14,10" fill="#f5c9a8"/>
+          <polygon points="24,14 20,3 28,10" fill="#d9722c"/>
+          <polygon points="22,10 21,5 25,9" fill="#f5c9a8"/>
+          <!-- face / muzzle -->
+          <path d="M6 16 Q0 17 1 22 Q6 23 10 19 Z" fill="#f5e6d3"/>
+          <circle cx="2" cy="20" r="1" fill="#2c1b0f"/>
+          <circle cx="12" cy="13" r="1.3" fill="#2c1b0f"/>
+          <circle cx="12.3" cy="12.6" r="0.4" fill="white"/>
+          <!-- legs -->
           <g class="a-leg"><rect x="18" y="25" width="4" height="10" fill="#a1531c"/></g>
-          <g class="a-leg a-leg2"><rect x="40" y="25" width="4" height="10" fill="#a1531c"/></g>
+          <g class="a-leg a-leg2"><rect x="38" y="25" width="4" height="10" fill="#a1531c"/></g>
           <g class="a-leg"><rect x="26" y="25" width="4" height="10" fill="#a1531c"/></g>
-          <g class="a-leg a-leg2"><rect x="48" y="25" width="4" height="10" fill="#a1531c"/></g>
-          <circle cx="10" cy="9" r="1" fill="#2c1b0f"/>
+          <g class="a-leg a-leg2"><rect x="46" y="25" width="4" height="10" fill="#a1531c"/></g>
         </svg>
       </div>
 
@@ -551,8 +575,8 @@
     <div id="player"></div>
 
     <div id="touch-controls">
-      <button id="btn-up" aria-label="Up">▲</button>
       <button id="btn-left" aria-label="Left">◀</button>
+      <button id="btn-up" aria-label="Up">▲</button>
       <button id="btn-down" aria-label="Down">▼</button>
       <button id="btn-right" aria-label="Right">▶</button>
     </div>
@@ -770,7 +794,7 @@
   /* ============================= CONTENT DATA (unchanged text, now tied to buildingSVGs) ============================= */
   const items = [
     {
-      x: "10%", bottom: "9%", building: 'gym',
+      x: "10%", bottom: "41%", building: 'gym', label: 'Skills',
       title: '🔨 Skills (Technical & Non-Technical)',
       content: [
         { type: 'heading2', text: 'Technical Skills' },
@@ -792,7 +816,7 @@
       ]
     },
     {
-      x: "68%", bottom: "9%", building: 'tech',
+      x: "68%", bottom: "41%", building: 'tech', label: 'Projects',
       title: '💻 My Projects',
       content: [
         { type: 'paragraph', text: 'Here are some of my key projects that demonstrate my technical skills:' },
@@ -808,7 +832,7 @@
       ]
     },
     {
-      x: "38%", bottom: "9%", building: 'office',
+      x: "38%", bottom: "41%", building: 'office', label: 'Work Experience',
       title: '💼 Work Experience (Details on Request)',
       content: [
         { type: 'heading2', text: 'TECHNICAL PROGRAM MANAGER | USA | MAY 2021 - PRESENT' },
@@ -820,7 +844,7 @@
       ]
     },
     {
-      x: "12%", bottom: "41%", building: 'library',
+      x: "12%", bottom: "16%", building: 'library', label: 'Publications',
       title: '📚 Publications and Research Experience',
       content: [
         { type: 'paragraph', text: 'My research and publications focus on data science applications and AI innovations:' },
@@ -843,7 +867,7 @@
       ]
     },
     {
-      x: "42%", bottom: "41%", building: 'university',
+      x: "42%", bottom: "16%", building: 'university', label: 'Education',
       title: '📝 Education and Certifications (Details on Request)',
       content: [
         { type: 'heading2', text: 'Education' },
@@ -861,7 +885,7 @@
       ]
     },
     {
-      x: "72%", bottom: "41%", building: 'museum',
+      x: "72%", bottom: "16%", building: 'museum', label: 'Achievements',
       title: '🏆 Achievements and Links',
       content: [
         { type: 'heading2', text: 'Key Achievements' },
@@ -894,6 +918,10 @@
     el.style.left = item.x;
     el.style.bottom = item.bottom;
     el.innerHTML = buildingSVGs[item.building];
+    const label = document.createElement('div');
+    label.className = 'building-label';
+    label.textContent = item.label;
+    el.appendChild(label);
     el.onclick = () => showDialog(item.title, item.content);
     gameArea.appendChild(el);
     item._el = el; // cache for proximity checks, avoids re-querying the DOM every frame
@@ -995,6 +1023,10 @@
     const speed = Math.max(2.5, gameArea.offsetWidth * 0.006);
     const maxX = gameArea.offsetWidth - player.offsetWidth;
     const maxY = gameArea.offsetHeight - player.offsetHeight;
+    // Ground visually begins around 52% down the scene (sky/ground blend);
+    // keep the player's feet from crossing above that line into the sky.
+    const groundLineY = gameArea.offsetHeight * 0.52;
+    const minY = Math.max(0, groundLineY - player.offsetHeight);
 
     let dx = 0, dy = 0;
     if (keys.ArrowLeft) dx -= 1;
@@ -1008,7 +1040,7 @@
       // normalize so diagonal movement isn't faster
       const len = Math.hypot(dx, dy) || 1;
       playerX = Math.min(maxX, Math.max(0, playerX + (dx / len) * speed));
-      playerY = Math.min(maxY, Math.max(0, playerY + (dy / len) * speed));
+      playerY = Math.min(maxY, Math.max(minY, playerY + (dy / len) * speed));
 
       if (dx < 0) facing = 'left';
       else if (dx > 0) facing = 'right';
@@ -1047,7 +1079,12 @@
     });
 
     nearbyItem = found;
-    interactionHint.style.display = nearbyItem ? 'block' : 'none';
+    const showHint = nearbyItem && !isSmallScreen();
+    interactionHint.style.display = showHint ? 'block' : 'none';
+  }
+
+  function isSmallScreen() {
+    return window.matchMedia('(max-width: 700px), (pointer: coarse)').matches;
   }
 
   requestAnimationFrame(gameLoop);
