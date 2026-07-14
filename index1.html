@@ -1,0 +1,946 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Nikita's Interactive Portfolio</title>
+<style>
+  * { box-sizing: border-box; }
+  body, html {
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    font-family: Arial, Helvetica, sans-serif;
+  }
+
+  #game-area {
+    width: 100vw;
+    height: 100vh;
+    position: relative;
+    overflow: hidden;
+    background: #cfe8f5;
+  }
+
+  /* ============================= SCENE / BACKGROUND ============================= */
+  #scene {
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    overflow: hidden;
+  }
+  .sky {
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 62%;
+    background: linear-gradient(to bottom, #6fb3e0 0%, #bfe1f2 70%, #eaf6e6 100%);
+  }
+  .ground {
+    position: absolute;
+    bottom: 0; left: 0; right: 0;
+    height: 42%;
+    background: linear-gradient(to bottom, #8fc76b 0%, #6ea852 100%);
+  }
+  .sun {
+    position: absolute;
+    top: 6%;
+    right: 8%;
+    width: clamp(40px, 6vw, 80px);
+    height: clamp(40px, 6vw, 80px);
+    border-radius: 50%;
+    background: radial-gradient(circle, #fff6c9 0%, #ffe98a 60%, #ffd85e 100%);
+    box-shadow: 0 0 40px 10px rgba(255, 230, 140, 0.6);
+  }
+  .cloud {
+    position: absolute;
+    background: rgba(255,255,255,0.85);
+    border-radius: 50px;
+    filter: blur(0.5px);
+    animation: driftCloud linear infinite;
+  }
+  .cloud::before, .cloud::after {
+    content: "";
+    position: absolute;
+    background: inherit;
+    border-radius: 50%;
+  }
+  .cloud1 { width: 8vw; height: 2.5vw; top: 12%; left: -15%; animation-duration: 60s; }
+  .cloud1::before { width: 4vw; height: 4vw; top: -2vw; left: 1vw; }
+  .cloud1::after { width: 5vw; height: 3vw; top: -1.2vw; left: 4vw; }
+  .cloud2 { width: 6vw; height: 2vw; top: 22%; left: -20%; animation-duration: 85s; animation-delay: -20s; }
+  .cloud2::before { width: 3vw; height: 3vw; top: -1.5vw; left: 1vw; }
+  .cloud2::after { width: 4vw; height: 2.4vw; top: -1vw; left: 3vw; }
+  @keyframes driftCloud {
+    from { transform: translateX(0); }
+    to { transform: translateX(140vw); }
+  }
+
+  .river-wrap {
+    position: absolute;
+    left: 0; right: 0;
+    top: 60%;
+    height: 9%;
+    z-index: 1;
+  }
+  .river-wrap svg { width: 100%; height: 100%; display: block; }
+
+  .tree {
+    position: absolute;
+    bottom: 6%;
+    width: clamp(50px, 6vw, 90px);
+    z-index: 1;
+  }
+  .tree svg { width: 100%; height: auto; display: block; overflow: visible; }
+  .tree .canopy {
+    transform-origin: 50% 100%;
+    animation: sway 3.2s ease-in-out infinite;
+  }
+  @keyframes sway {
+    0%, 100% { transform: rotate(-2.5deg); }
+    50% { transform: rotate(2.5deg); }
+  }
+
+  .bird {
+    position: absolute;
+    width: clamp(18px, 2.4vw, 30px);
+    animation: flyAcross linear infinite;
+  }
+  .bird svg { width: 100%; height: auto; display: block; }
+  .bird .wing {
+    transform-origin: 50% 50%;
+    animation: flap 0.35s ease-in-out infinite alternate;
+  }
+  @keyframes flap {
+    from { transform: scaleY(1); }
+    to { transform: scaleY(0.35); }
+  }
+  @keyframes flyAcross {
+    from { transform: translate(-10vw, 0); }
+    to { transform: translate(110vw, -4vh); }
+  }
+
+  .animal {
+    position: absolute;
+    bottom: 8%;
+    width: clamp(40px, 5vw, 70px);
+    left: 30%;
+    z-index: 1;
+    animation: animalWalk 14s ease-in-out infinite;
+  }
+  .animal svg { width: 100%; height: auto; display: block; }
+  .animal .a-leg {
+    transform-origin: 50% 0%;
+    animation: walk 0.5s infinite alternate ease-in-out;
+  }
+  .animal .a-leg2 { animation-delay: 0.25s; }
+  @keyframes animalWalk {
+    0%   { transform: translateX(0) scaleX(1); }
+    48%  { transform: translateX(22vw) scaleX(1); }
+    50%  { transform: translateX(22vw) scaleX(-1); }
+    98%  { transform: translateX(0) scaleX(-1); }
+    100% { transform: translateX(0) scaleX(1); }
+  }
+
+  /* ============================= BUILDINGS ============================= */
+  .item {
+    position: absolute;
+    width: clamp(90px, 13vw, 165px);
+    aspect-ratio: 100 / 120;
+    cursor: pointer;
+    z-index: 2;
+    transition: transform 0.25s ease;
+  }
+  .item svg { width: 100%; height: 100%; display: block; overflow: visible; }
+  .item.nearby {
+    filter: drop-shadow(0 0 14px rgba(255, 230, 100, 0.9));
+    transform: scale(1.05);
+  }
+  .door {
+    transform-box: fill-box;
+    transform-origin: left center;
+    transition: transform 0.45s ease;
+  }
+  .item.nearby .door {
+    transform: scaleX(0.25) skewY(18deg);
+  }
+
+  /* ============================= PLAYER ============================= */
+  #player {
+    position: absolute;
+    width: clamp(46px, 6.5vw, 82px);
+    aspect-ratio: 70 / 118;
+    z-index: 1000;
+  }
+  #player svg { width: 100%; height: 100%; display: block; overflow: visible; }
+  #player .char {
+    transition: transform 0.1s ease;
+    transform-origin: center;
+  }
+  #player .char.facing-left {
+    transform: scaleX(-1);
+  }
+  #player .v-leg-l, #player .v-leg-r {
+    transform-origin: 50% 0%;
+    animation: walkLegs 0.5s infinite alternate ease-in-out;
+    animation-play-state: paused;
+  }
+  #player .v-leg-r { animation-delay: 0.25s; }
+  #player.walking .v-leg-l, #player.walking .v-leg-r {
+    animation-play-state: running;
+  }
+  @keyframes walkLegs {
+    from { transform: rotate(-16deg); }
+    to { transform: rotate(16deg); }
+  }
+
+  /* ============================= UI ============================= */
+  #info-dialog {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: white;
+    padding: clamp(16px, 3vw, 30px);
+    border-radius: 10px;
+    box-shadow: 0 4px 24px rgba(0,0,0,0.35);
+    z-index: 2000;
+    max-width: 600px;
+    width: 90%;
+    max-height: 80vh;
+    overflow-y: auto;
+    display: none;
+  }
+  #info-dialog h1 {
+    font-size: clamp(18px, 3vw, 26px);
+    margin-bottom: 16px;
+    text-align: center;
+  }
+  #info-content h2 {
+    font-size: clamp(15px, 2.2vw, 19px);
+    margin-top: 22px;
+    margin-bottom: 8px;
+    color: #333;
+    border-bottom: 2px solid #007acc;
+    padding-bottom: 5px;
+  }
+  #info-content h3 {
+    font-size: clamp(13px, 1.8vw, 15px);
+    margin-top: 18px;
+    margin-bottom: 8px;
+    color: #555;
+  }
+  #info-content p {
+    font-size: clamp(13px, 1.8vw, 15px);
+    line-height: 1.6;
+    margin-bottom: 14px;
+    text-align: justify;
+  }
+  #info-content a {
+    color: #4402c7;
+    font-size: clamp(13px, 1.8vw, 15px);
+    display: inline-block;
+    margin-bottom: 14px;
+  }
+  #info-content ul, #info-content ol {
+    padding-left: 20px;
+    line-height: 1.6;
+    margin-bottom: 14px;
+    font-size: clamp(13px, 1.8vw, 15px);
+  }
+  #close-button {
+    position: absolute;
+    top: 8px;
+    right: 12px;
+    border: none;
+    background: none;
+    font-size: 22px;
+    cursor: pointer;
+    line-height: 1;
+  }
+  #instructions {
+    position: absolute;
+    top: 10px;
+    left: 50%;
+    transform: translateX(-50%);
+    background-color: rgba(255, 255, 255, 0.9);
+    padding: 6px 14px;
+    border-radius: 6px;
+    z-index: 5;
+    font-size: clamp(11px, 1.6vw, 14px);
+    text-align: center;
+    max-width: 90vw;
+  }
+  #interaction-hint {
+    position: absolute;
+    bottom: clamp(70px, 12vh, 90px);
+    left: 50%;
+    transform: translateX(-50%);
+    background-color: rgba(0, 122, 204, 0.92);
+    color: white;
+    padding: 7px 16px;
+    border-radius: 20px;
+    font-size: clamp(12px, 1.8vw, 14px);
+    display: none;
+    z-index: 5;
+    animation: pulse 1.5s infinite;
+    white-space: nowrap;
+  }
+  @keyframes pulse {
+    0%, 100% { opacity: 0.7; }
+    50% { opacity: 1; }
+  }
+
+  /* ============================= TOUCH CONTROLS ============================= */
+  #touch-controls {
+    display: none;
+    position: absolute;
+    bottom: 14px;
+    left: 14px;
+    z-index: 6;
+    grid-template-columns: repeat(3, 48px);
+    grid-template-rows: repeat(2, 48px);
+    gap: 4px;
+  }
+  #touch-controls button {
+    border: none;
+    border-radius: 8px;
+    background: rgba(44, 62, 80, 0.75);
+    color: white;
+    font-size: 18px;
+    touch-action: manipulation;
+  }
+  #touch-controls button:active { background: rgba(44, 62, 80, 0.95); }
+  #btn-up { grid-column: 2; grid-row: 1; }
+  #btn-left { grid-column: 1; grid-row: 2; }
+  #btn-down { grid-column: 2; grid-row: 2; }
+  #btn-right { grid-column: 3; grid-row: 2; }
+
+  #btn-interact {
+    display: none;
+    position: absolute;
+    bottom: 24px;
+    right: 20px;
+    z-index: 6;
+    width: 64px;
+    height: 64px;
+    border-radius: 50%;
+    border: none;
+    background: rgba(0, 122, 204, 0.9);
+    color: white;
+    font-size: 13px;
+    font-weight: bold;
+    touch-action: manipulation;
+  }
+
+  @media (pointer: coarse) {
+    #touch-controls { display: grid; }
+    #btn-interact { display: block; }
+  }
+</style>
+</head>
+<body>
+  <div id="game-area">
+
+    <!-- ===================== CODED ANIMATED BACKGROUND ===================== -->
+    <div id="scene">
+      <div class="sky"></div>
+      <div class="sun"></div>
+      <div class="cloud cloud1"></div>
+      <div class="cloud cloud2"></div>
+
+      <!-- trees, positions vary -->
+      <div class="tree" style="left:4%;">
+        <svg viewBox="0 0 60 90">
+          <rect x="26" y="55" width="8" height="35" fill="#6b4226"/>
+          <g class="canopy">
+            <circle cx="30" cy="40" r="24" fill="#4c8c3f"/>
+            <circle cx="16" cy="48" r="15" fill="#5a9d4a"/>
+            <circle cx="44" cy="48" r="15" fill="#5a9d4a"/>
+          </g>
+        </svg>
+      </div>
+      <div class="tree" style="left:16%; bottom:5%;">
+        <svg viewBox="0 0 60 90">
+          <rect x="26" y="55" width="8" height="35" fill="#6b4226"/>
+          <g class="canopy" style="animation-delay:-1.1s;">
+            <circle cx="30" cy="40" r="22" fill="#5a9d4a"/>
+            <circle cx="18" cy="46" r="13" fill="#4c8c3f"/>
+            <circle cx="42" cy="46" r="13" fill="#4c8c3f"/>
+          </g>
+        </svg>
+      </div>
+      <div class="tree" style="right:6%; bottom:7%;">
+        <svg viewBox="0 0 60 90">
+          <rect x="26" y="55" width="8" height="35" fill="#6b4226"/>
+          <g class="canopy" style="animation-delay:-2s;">
+            <circle cx="30" cy="40" r="25" fill="#4c8c3f"/>
+            <circle cx="15" cy="50" r="14" fill="#5a9d4a"/>
+            <circle cx="45" cy="50" r="14" fill="#5a9d4a"/>
+          </g>
+        </svg>
+      </div>
+      <div class="tree" style="right:18%; bottom:4%;">
+        <svg viewBox="0 0 60 90">
+          <rect x="26" y="55" width="8" height="35" fill="#6b4226"/>
+          <g class="canopy" style="animation-delay:-0.5s;">
+            <circle cx="30" cy="40" r="21" fill="#5a9d4a"/>
+            <circle cx="18" cy="47" r="12" fill="#4c8c3f"/>
+            <circle cx="42" cy="47" r="12" fill="#4c8c3f"/>
+          </g>
+        </svg>
+      </div>
+
+      <!-- river with animated shimmer -->
+      <div class="river-wrap">
+        <svg viewBox="0 0 1000 100" preserveAspectRatio="none">
+          <defs>
+            <linearGradient id="riverGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+              <stop offset="0%" stop-color="#4a90c4"/>
+              <stop offset="50%" stop-color="#7ec4e8"/>
+              <stop offset="100%" stop-color="#4a90c4"/>
+              <animateTransform attributeName="gradientTransform" type="translate"
+                from="-300 0" to="300 0" dur="4s" repeatCount="indefinite"/>
+            </linearGradient>
+          </defs>
+          <path d="M0,40 C150,10 300,70 500,40 C700,10 850,70 1000,45 L1000,100 L0,100 Z" fill="url(#riverGrad)"/>
+        </svg>
+      </div>
+
+      <div class="ground"></div>
+
+      <!-- birds -->
+      <div class="bird" style="top:10%; animation-duration:22s; animation-delay:0s;">
+        <svg viewBox="0 0 40 20">
+          <path class="wing" d="M20 10 L2 2" stroke="#2c3e50" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+          <path class="wing" d="M20 10 L38 2" stroke="#2c3e50" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+        </svg>
+      </div>
+      <div class="bird" style="top:16%; animation-duration:28s; animation-delay:-8s;">
+        <svg viewBox="0 0 40 20">
+          <path class="wing" d="M20 10 L2 2" stroke="#2c3e50" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+          <path class="wing" d="M20 10 L38 2" stroke="#2c3e50" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+        </svg>
+      </div>
+      <div class="bird" style="top:8%; animation-duration:19s; animation-delay:-14s;">
+        <svg viewBox="0 0 40 20">
+          <path class="wing" d="M20 10 L2 2" stroke="#2c3e50" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+          <path class="wing" d="M20 10 L38 2" stroke="#2c3e50" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+        </svg>
+      </div>
+
+      <!-- walking animal (fox) -->
+      <div class="animal">
+        <svg viewBox="0 0 70 40">
+          <path d="M8 26 Q4 14 16 12 L50 12 Q62 12 60 24 L58 28 Q52 22 44 24 L20 24 Q14 30 8 26 Z" fill="#d9722c"/>
+          <polygon points="12,13 6,4 16,10" fill="#d9722c"/>
+          <polygon points="9,10 7,5 12,9" fill="#f5e6d3"/>
+          <path d="M58 24 Q68 18 66 8 Q62 12 60 20 Z" fill="#d9722c"/>
+          <path d="M62 10 Q66 12 66 8" fill="none" stroke="#f5e6d3" stroke-width="2"/>
+          <g class="a-leg"><rect x="18" y="25" width="4" height="10" fill="#a1531c"/></g>
+          <g class="a-leg a-leg2"><rect x="40" y="25" width="4" height="10" fill="#a1531c"/></g>
+          <g class="a-leg"><rect x="26" y="25" width="4" height="10" fill="#a1531c"/></g>
+          <g class="a-leg a-leg2"><rect x="48" y="25" width="4" height="10" fill="#a1531c"/></g>
+          <circle cx="10" cy="9" r="1" fill="#2c1b0f"/>
+        </svg>
+      </div>
+    </div>
+
+    <div id="instructions">Use Arrow Keys to move, Enter to Interact, and Esc to close a dialog box</div>
+    <div id="interaction-hint">Press Enter to interact!</div>
+
+    <div id="player"></div>
+
+    <div id="touch-controls">
+      <button id="btn-up" aria-label="Up">▲</button>
+      <button id="btn-left" aria-label="Left">◀</button>
+      <button id="btn-down" aria-label="Down">▼</button>
+      <button id="btn-right" aria-label="Right">▶</button>
+    </div>
+    <button id="btn-interact">TALK</button>
+  </div>
+
+  <div id="info-dialog">
+    <button id="close-button">×</button>
+    <h1 id="info-title"></h1>
+    <div id="info-content"></div>
+  </div>
+
+<script>
+  /* ============================= PLAYER SVG (chosen style: detailed vector, fuller hair + stylish glasses) ============================= */
+  const playerSVG = `
+  <svg viewBox="0 0 70 118">
+    <defs>
+      <radialGradient id="skinGrad" cx="40%" cy="35%" r="70%">
+        <stop offset="0%" stop-color="#d99a6c"/>
+        <stop offset="100%" stop-color="#a9764f"/>
+      </radialGradient>
+      <linearGradient id="hairGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+        <stop offset="0%" stop-color="#4a2c1a"/>
+        <stop offset="50%" stop-color="#2c1b0f"/>
+        <stop offset="100%" stop-color="#1a0f08"/>
+      </linearGradient>
+      <linearGradient id="shineGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+        <stop offset="0%" stop-color="#8a5a34" stop-opacity="0.7"/>
+        <stop offset="100%" stop-color="#8a5a34" stop-opacity="0"/>
+      </linearGradient>
+      <linearGradient id="suitGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+        <stop offset="0%" stop-color="#233a52"/>
+        <stop offset="100%" stop-color="#152436"/>
+      </linearGradient>
+      <linearGradient id="carrierGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+        <stop offset="0%" stop-color="#d0453a"/>
+        <stop offset="100%" stop-color="#9c2a20"/>
+      </linearGradient>
+      <linearGradient id="lensGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+        <stop offset="0%" stop-color="#c98b4a" stop-opacity="0.35"/>
+        <stop offset="100%" stop-color="#7a4a24" stop-opacity="0.35"/>
+      </linearGradient>
+    </defs>
+    <g class="char">
+      <ellipse cx="35" cy="110" rx="18" ry="4.5" fill="black" opacity="0.25"/>
+      <path d="M18 22 c-3 14 -2 30 4 40 l4 -3 c-5 -9 -6 -24 -3 -35 Z" fill="url(#hairGrad)"/>
+      <path d="M52 22 c3 14 2 30 -4 40 l-4 -3 c5 -9 6 -24 3 -35 Z" fill="url(#hairGrad)"/>
+      <rect x="10" y="42" width="8" height="24" rx="4" fill="url(#skinGrad)"/>
+      <path d="M22 40 h26 l4 34 h-34 Z" fill="url(#suitGrad)"/>
+      <path d="M35 44 v28" stroke="#0f1b28" stroke-width="1" opacity="0.4"/>
+      <path d="M24 46 q11 4 22 0" stroke="#0f1b28" stroke-width="1" opacity="0.3" fill="none"/>
+      <polygon points="30,40 35,49 40,40" fill="#f7f7f7"/>
+      <polygon points="30,40 33,44 27,42" fill="#233a52"/>
+      <polygon points="40,40 37,44 43,42" fill="#233a52"/>
+      <rect x="24" y="52" width="22" height="20" rx="7" fill="url(#carrierGrad)"/>
+      <path d="M26 56 h18" stroke="#7d2018" stroke-width="1" opacity="0.5"/>
+      <line x1="24" y1="52" x2="19" y2="41" stroke="#7d2018" stroke-width="4" stroke-linecap="round"/>
+      <line x1="46" y1="52" x2="51" y2="41" stroke="#7d2018" stroke-width="4" stroke-linecap="round"/>
+      <circle cx="35" cy="50" r="7.2" fill="url(#skinGrad)"/>
+      <path d="M29 47 a7 7 0 0 1 6 -4" stroke="#2c1b0f" stroke-width="2.4" fill="none" stroke-linecap="round"/>
+      <circle cx="32" cy="49.3" r="1" fill="#2c1b0f"/>
+      <circle cx="38" cy="49.3" r="1" fill="#2c1b0f"/>
+      <path d="M32.5 52.5 q2.5 2 5 0" stroke="#7a4a30" stroke-width="1" fill="none" stroke-linecap="round"/>
+      <rect x="42" y="52" width="8" height="20" rx="4" fill="url(#skinGrad)"/>
+      <g class="v-leg-l"><rect x="24" y="72" width="9.5" height="27" rx="3.5" fill="#101820"/></g>
+      <g class="v-leg-r"><rect x="36.5" y="72" width="9.5" height="27" rx="3.5" fill="#101820"/></g>
+      <rect x="23" y="97" width="11" height="4" rx="2" fill="#0a0e12"/>
+      <rect x="36" y="97" width="11" height="4" rx="2" fill="#0a0e12"/>
+      <path d="M30 38 q5 4 10 0 l0 4 q-5 3 -10 0 Z" fill="#8a5c3c" opacity="0.5"/>
+      <circle cx="35" cy="21" r="14.5" fill="url(#skinGrad)"/>
+      <ellipse cx="30" cy="17" rx="4" ry="3" fill="white" opacity="0.15"/>
+      <path d="M19 20 a16 16 0 0 1 32 0 c0 6 -2 10 -3.5 13 c1 -8 -3 -16 -12.5 -16 s-13.5 8 -12.5 16 c-1.5 -3 -3.5 -7 -3.5 -13 Z" fill="url(#hairGrad)"/>
+      <path d="M19.5 22 c-2.5 10 -1.5 22 3 30 l3 -2.5 c-4 -7.5 -5 -18 -3.2 -26.5 Z" fill="url(#hairGrad)"/>
+      <path d="M50.5 22 c2.5 10 1.5 22 -3 30 l-3 -2.5 c4 -7.5 5 -18 3.2 -26.5 Z" fill="url(#hairGrad)"/>
+      <path d="M24 10 q11 -6 22 0 q-2 4 -5 5 q-6 -4 -12 0 q-3 -1 -5 -5 Z" fill="url(#hairGrad)"/>
+      <path d="M25 13 q10 -4 20 0" stroke="url(#shineGrad)" stroke-width="1.4" fill="none" opacity="0.8"/>
+      <path d="M21 24 q-1 8 1.5 16" stroke="url(#shineGrad)" stroke-width="1.2" fill="none" opacity="0.6"/>
+      <path d="M49 24 q1 8 -1.5 16" stroke="url(#shineGrad)" stroke-width="1.2" fill="none" opacity="0.6"/>
+      <path d="M26 20.5 q3 -1.5 6 0" stroke="#2c1b0f" stroke-width="1" fill="none" stroke-linecap="round"/>
+      <path d="M38 20.5 q3 -1.5 6 0" stroke="#2c1b0f" stroke-width="1" fill="none" stroke-linecap="round"/>
+      <path d="M23.5 24.5 q0 -6 5.5 -6 q5.5 0 5.5 6 q0 5.5 -5.5 5.5 q-5.5 0 -5.5 -5.5 Z" fill="url(#lensGrad)" stroke="#5a3a1e" stroke-width="1.7"/>
+      <path d="M35.5 24.5 q0 -6 5.5 -6 q5.5 0 5.5 6 q0 5.5 -5.5 5.5 q-5.5 0 -5.5 -5.5 Z" fill="url(#lensGrad)" stroke="#5a3a1e" stroke-width="1.7"/>
+      <path d="M34.3 22.5 h1.4" stroke="#5a3a1e" stroke-width="1.7"/>
+      <path d="M29 18.6 q2 -2.2 4.5 -0.8" stroke="#5a3a1e" stroke-width="1.6" fill="none" stroke-linecap="round"/>
+      <path d="M41 18.6 q-2 -2.2 -4.5 -0.8" stroke="#5a3a1e" stroke-width="1.6" fill="none" stroke-linecap="round"/>
+      <line x1="23.6" y1="23" x2="20.5" y2="21" stroke="#5a3a1e" stroke-width="1.4"/>
+      <line x1="46.4" y1="23" x2="49.5" y2="21" stroke="#5a3a1e" stroke-width="1.4"/>
+      <circle cx="29" cy="24.3" r="1.4" fill="#2c1b0f"/>
+      <circle cx="41" cy="24.3" r="1.4" fill="#2c1b0f"/>
+      <circle cx="29.4" cy="23.9" r="0.4" fill="white"/>
+      <circle cx="41.4" cy="23.9" r="0.4" fill="white"/>
+      <path d="M35 25 q1 2.5 -0.5 4" stroke="#8a5c3c" stroke-width="1" fill="none" stroke-linecap="round"/>
+      <path d="M30.5 30 q4.5 3.5 9 0" stroke="#7a4a30" stroke-width="1.3" fill="none" stroke-linecap="round"/>
+      <ellipse cx="26" cy="27" rx="2.2" ry="1.4" fill="#c46a4a" opacity="0.25"/>
+      <ellipse cx="44" cy="27" rx="2.2" ry="1.4" fill="#c46a4a" opacity="0.25"/>
+    </g>
+  </svg>`;
+  document.getElementById('player').innerHTML = playerSVG;
+
+  /* ============================= BUILDING SVG TEMPLATES (each includes a .door group) ============================= */
+  const buildingSVGs = {
+    gym: `
+      <svg viewBox="0 0 100 120">
+        <ellipse cx="50" cy="114" rx="42" ry="5" fill="black" opacity="0.15"/>
+        <rect x="10" y="40" width="80" height="70" fill="#d35400"/>
+        <polygon points="5,40 50,10 95,40" fill="#922b0e"/>
+        <rect x="18" y="50" width="14" height="14" fill="#f7dc6f"/>
+        <rect x="68" y="50" width="14" height="14" fill="#f7dc6f"/>
+        <rect x="30" y="20" width="40" height="12" rx="2" fill="#2c3e50"/>
+        <text x="50" y="29" font-size="8" fill="white" text-anchor="middle" font-weight="bold">GYM</text>
+        <g class="door">
+          <rect x="40" y="80" width="20" height="30" fill="#5b2c0d"/>
+          <circle cx="57" cy="96" r="1.6" fill="#f7dc6f"/>
+        </g>
+      </svg>`,
+    tech: `
+      <svg viewBox="0 0 100 120">
+        <ellipse cx="50" cy="114" rx="38" ry="5" fill="black" opacity="0.15"/>
+        <rect x="15" y="20" width="70" height="90" fill="#2c3e50"/>
+        <rect x="22" y="28" width="14" height="14" fill="#5dade2"/>
+        <rect x="43" y="28" width="14" height="14" fill="#5dade2"/>
+        <rect x="64" y="28" width="14" height="14" fill="#5dade2"/>
+        <rect x="22" y="48" width="14" height="14" fill="#5dade2"/>
+        <rect x="43" y="48" width="14" height="14" fill="#5dade2"/>
+        <rect x="64" y="48" width="14" height="14" fill="#5dade2"/>
+        <rect x="22" y="68" width="14" height="14" fill="#5dade2"/>
+        <rect x="64" y="68" width="14" height="14" fill="#5dade2"/>
+        <g class="door">
+          <rect x="40" y="90" width="20" height="20" fill="#1b2631"/>
+          <circle cx="56" cy="100" r="1.5" fill="#5dade2"/>
+        </g>
+      </svg>`,
+    office: `
+      <svg viewBox="0 0 100 120">
+        <ellipse cx="50" cy="114" rx="34" ry="5" fill="black" opacity="0.15"/>
+        <rect x="20" y="15" width="60" height="95" fill="#7f8c8d"/>
+        <rect x="27" y="24" width="10" height="10" fill="#eaf2f8"/>
+        <rect x="45" y="24" width="10" height="10" fill="#eaf2f8"/>
+        <rect x="63" y="24" width="10" height="10" fill="#eaf2f8"/>
+        <rect x="27" y="42" width="10" height="10" fill="#eaf2f8"/>
+        <rect x="45" y="42" width="10" height="10" fill="#eaf2f8"/>
+        <rect x="63" y="42" width="10" height="10" fill="#eaf2f8"/>
+        <rect x="27" y="60" width="10" height="10" fill="#eaf2f8"/>
+        <rect x="45" y="60" width="10" height="10" fill="#eaf2f8"/>
+        <rect x="63" y="60" width="10" height="10" fill="#eaf2f8"/>
+        <rect x="27" y="78" width="10" height="10" fill="#eaf2f8"/>
+        <rect x="63" y="78" width="10" height="10" fill="#eaf2f8"/>
+        <g class="door">
+          <rect x="42" y="88" width="16" height="22" fill="#34495e"/>
+          <circle cx="55" cy="99" r="1.4" fill="#eaf2f8"/>
+        </g>
+      </svg>`,
+    library: `
+      <svg viewBox="0 0 100 120">
+        <ellipse cx="50" cy="114" rx="42" ry="5" fill="black" opacity="0.15"/>
+        <ellipse cx="50" cy="25" rx="26" ry="14" fill="#a569bd"/>
+        <rect x="15" y="38" width="70" height="8" fill="#6c3483"/>
+        <rect x="20" y="46" width="6" height="45" fill="#d2b4de"/>
+        <rect x="34" y="46" width="6" height="45" fill="#d2b4de"/>
+        <rect x="62" y="46" width="6" height="45" fill="#d2b4de"/>
+        <rect x="76" y="46" width="6" height="45" fill="#d2b4de"/>
+        <rect x="10" y="91" width="80" height="8" fill="#6c3483"/>
+        <g class="door">
+          <rect x="42" y="99" width="16" height="11" fill="#4a235a"/>
+          <circle cx="55" cy="104" r="1.2" fill="#d2b4de"/>
+        </g>
+      </svg>`,
+    university: `
+      <svg viewBox="0 0 100 120">
+        <ellipse cx="50" cy="114" rx="42" ry="5" fill="black" opacity="0.15"/>
+        <rect x="42" y="5" width="16" height="20" fill="#2874a6"/>
+        <circle cx="50" cy="12" r="6" fill="#eaf2f8"/>
+        <polygon points="15,35 50,15 85,35" fill="#1b4f72"/>
+        <rect x="15" y="35" width="70" height="8" fill="#154360"/>
+        <rect x="22" y="43" width="7" height="48" fill="#5dade2"/>
+        <rect x="36" y="43" width="7" height="48" fill="#5dade2"/>
+        <rect x="57" y="43" width="7" height="48" fill="#5dade2"/>
+        <rect x="71" y="43" width="7" height="48" fill="#5dade2"/>
+        <rect x="10" y="91" width="80" height="8" fill="#154360"/>
+        <g class="door">
+          <rect x="43" y="99" width="14" height="11" fill="#0b2e4a"/>
+          <circle cx="54" cy="104" r="1.2" fill="#5dade2"/>
+        </g>
+      </svg>`,
+    museum: `
+      <svg viewBox="0 0 100 120">
+        <ellipse cx="50" cy="114" rx="46" ry="5" fill="black" opacity="0.15"/>
+        <polygon points="12,38 50,16 88,38" fill="#b7950b"/>
+        <rect x="12" y="38" width="76" height="7" fill="#9a7d0a"/>
+        <rect x="18" y="45" width="6" height="42" fill="#f4d03f"/>
+        <rect x="30" y="45" width="6" height="42" fill="#f4d03f"/>
+        <rect x="64" y="45" width="6" height="42" fill="#f4d03f"/>
+        <rect x="76" y="45" width="6" height="42" fill="#f4d03f"/>
+        <rect x="10" y="87" width="80" height="6" fill="#9a7d0a"/>
+        <rect x="6" y="93" width="88" height="6" fill="#7d6608"/>
+        <rect x="2" y="99" width="96" height="6" fill="#655306"/>
+        <g class="door">
+          <rect x="42" y="79" width="16" height="8" fill="#5c4b06"/>
+          <circle cx="55" cy="83" r="1.1" fill="#f4d03f"/>
+        </g>
+      </svg>`
+  };
+
+  /* ============================= CONTENT DATA (unchanged text, now tied to buildingSVGs) ============================= */
+  const items = [
+    {
+      x: "10%", y: "12%", building: 'gym',
+      title: '🔨 Skills (Technical & Non-Technical)',
+      content: [
+        { type: 'heading2', text: 'Technical Skills' },
+        { type: 'list', items: [
+          'PYTHON PROGRAMMING: Pandas, NumPy, SciPy, Matplotlib, Seaborn, Scikit-learn, TensorFlow, Keras, LlamaIndex, CrewAI',
+          'DATA SCIENCE, MACHINE LEARNING, DEEP LEARNING: Exploratory Data Analysis, Regression, Classification, Forecasting, Clustering, CNNs for Computer Vision',
+          'GENERATIVE AI: Prompt Engineering, Model Finetuning, RAG, AI Agents and Agentic AI, Working with LLMs like Gemini, ChatGPT, Claude AI, and Perplexity AI',
+          'PROGRAM MANAGEMENT: Jira, Trello, Scrum, Agile, Lean Six Sigma',
+          'RESEARCH: Research Design & Methodology, Hypothesis Formulation and Testing'
+        ]},
+        { type: 'heading2', text: 'Non-Technical Skills' },
+        { type: 'list', items: [
+          'Oral and Written Communication',
+          'Problem Solving and Analytical Skills',
+          'Adaptability and Multi-Tasking',
+          'Cross-Functional Team Collaboration and Stakeholder Engagement',
+          'Leadership and Time Management'
+        ]}
+      ]
+    },
+    {
+      x: "40%", y: "12%", building: 'tech',
+      title: '💻 My Projects',
+      content: [
+        { type: 'paragraph', text: 'Here are some of my key projects that demonstrate my technical skills:' },
+        { type: 'heading3', text: '1. CUSTOMER CHURN ANALYSIS (Data Analytics and Machine Learning):' },
+        { type: 'paragraph', text: 'An end-to-end data analytics and machine learning pipeline to predict customer churn using an e-commerce dataset. Applied exploratory data analysis (EDA), feature engineering, and machine learning model development and comparison using Python, Scikit-learn, Pandas, and Matplotlib' },
+        { type: 'heading3', text: '2. LIVE MASK DETECTION (Deep Learning, Human-AI Interaction):' },
+        { type: 'paragraph', text: 'Built a real-time facial recognition system to detect the presence or absence of face masks from a live video stream using Convolutional Neural Networks (CNNs) with Python, TensorFlow, and Keras.' },
+        { type: 'heading3', text: '3. DOCUMENT Q&A APPLICATION WITH RAG (Generative AI):' },
+        { type: 'paragraph', text: 'Created a Retrieval-Augmented Generation (RAG) application that answers user queries based on uploaded documents. Built using Python, LlamaIndex, and the OpenAI API.' },
+        { type: 'heading3', text: '4. REDDIT SENTIMENT ANALYSIS (Natural Language Processing [NLP], Data Visualization, HuggingFace Transformer Application):' },
+        { type: 'paragraph', text: 'Created a sentiment-analysis application that uses the Reddit API to collect user data on a given topic and then perform sentiment analysis using a general AI model and then an advanced AI model. Built using Python, the Reddit API, TextBlob and RoBERTa from HuggingFace.' },
+        { type: 'link', href: 'https://github.com/nikitasilaparasetty/Reddit-Sentiment-Analysis', text: 'Reddit Sentiment Analysis Project - GitHub Link' }
+      ]
+    },
+    {
+      x: "25%", y: "40%", building: 'office',
+      title: '💼 Work Experience (Details on Request)',
+      content: [
+        { type: 'heading2', text: 'TECHNICAL PROGRAM MANAGER | USA | MAY 2021 - PRESENT' },
+        { type: 'paragraph', text: 'Led the end-to-end planning and preparation for IT corporate training programs, collaborating cross-functionally between multiple stakeholders, proposing and supporting the innovation and automation of several operations, supporting the integration of AI within company processes, supported the onboarding and continuous mentoring of new-hires, developed and maintained technical documentation.' },
+        { type: 'heading2', text: 'UNIVERSITY ALUMNUS AMBASSADOR (PART-TIME) | UK | JUNE 2025 - PRESENT' },
+        { type: 'paragraph', text: 'Recently onboarded to mentor and assist prospective students through virtual and in-person outreach efforts such as educational fairs, college talks, and one-to-one support' },
+        { type: 'heading2', text: 'DATA SCIENCE AND MACHINE LEARNING INTERN | INDIA | APRIL - JUNE, 2017' },
+        { type: 'paragraph', text: 'Led a team in the research and presentation of the application of AI for humanitarian impact, and developed 2 AI-powered prototypes.' }
+      ]
+    },
+    {
+      x: "70%", y: "20%", building: 'library',
+      title: '📚 Publications and Research Experience',
+      content: [
+        { type: 'paragraph', text: 'My research and publications focus on data science applications and AI innovations:' },
+        { type: 'heading2', text: 'Machine Learning Concepts with Python and the Jupyter Notebook Environment: Using TensorFlow 2.0' },
+        { type: 'heading3', text: 'Published with Apress New York (a Springer Nature company) | 2020 (2nd Edition in discussion)' },
+        { type: 'paragraph', text: 'This book offers a comprehensive introduction to Artificial Intelligence, Machine Learning, and Deep Learning, followed by a beginner-friendly guide to Python programming and the Jupyter Notebook environment. It features step-by-step, hands-on projects using Python, TensorFlow, and Keras, enabling readers to apply core AI concepts through practical implementation.' },
+        { type: 'heading2', text: 'Research Experience' },
+        { type: 'heading3', text: '"Agentic AI for Personalized Healthcare: Transforming Medical Practice for Improved Patient Outcomes"' },
+        { type: 'paragraph', text: 'Collaborative Research Project | April 2025 - Present' },
+        { type: 'ordered_list', items: [
+          'Investigating the potential of agentic AI to improve diagnostics, treatment personalization, predictive healthcare, and drug discovery.',
+          'Addressing ethical and privacy concerns surrounding AI in medicine and examining possible future directions.'
+        ]},
+        { type: 'heading3', text: '"Would Quantum Computers Make Supercomputers Obsolete in the Field of High-Performance Computing?"' },
+        { type: 'paragraph', text: 'Independent Research Project | September 2024 – January 2025' },
+        { type: 'ordered_list', items: [
+          'Studied the possibility of supercomputers becoming obsolete with the rapid development of quantum computers.',
+          'Compared quantum computers and supercomputers based on a variety of significant parameters.'
+        ]}
+      ]
+    },
+    {
+      x: "45%", y: "60%", building: 'university',
+      title: '📝 Education and Certifications (Details on Request)',
+      content: [
+        { type: 'heading2', text: 'Education' },
+        { type: 'list', items: [
+          'MSc in Data Science | UK | Distinction',
+          'BSc in Mathematics and Statistics | India | First Class'
+        ]},
+        { type: 'heading2', text: 'Certifications' },
+        { type: 'list', items: [
+          'PCEP - Certified Entry Level Python Programmer (OpenEDG Python Institute)',
+          'Introduction to Generative AI (Google)',
+          'Machine Learning (Stanford University)',
+          'Neural Networks and Deep Learning (deeplearning.ai)'
+        ]}
+      ]
+    },
+    {
+      x: "70%", y: "50%", building: 'museum',
+      title: '🏆 Achievements and Links',
+      content: [
+        { type: 'heading2', text: 'Key Achievements' },
+        { type: 'paragraph', text: 'Throughout my career, I have been recognized for excellence in various domains:' },
+        { type: 'list', items: [
+          'Achievement 1 details',
+          'Achievement 2 details',
+          'Link 3 details'
+        ]}
+      ]
+    }
+  ];
+
+  /* ============================= DOM SETUP ============================= */
+  const player = document.getElementById('player');
+  const gameArea = document.getElementById('game-area');
+  const infoDialog = document.getElementById('info-dialog');
+  const closeButton = document.getElementById('close-button');
+  const interactionHint = document.getElementById('interaction-hint');
+
+  let playerX = 100;
+  let playerY = 100;
+  let facing = 'right';
+  let nearbyItem = null;
+
+  // Build building DOM elements once and cache references (avoids repeated querySelector)
+  items.forEach(item => {
+    const el = document.createElement('div');
+    el.className = 'item';
+    el.style.left = item.x;
+    el.style.top = item.y;
+    el.innerHTML = buildingSVGs[item.building];
+    el.onclick = () => showDialog(item.title, item.content);
+    gameArea.appendChild(el);
+    item._el = el; // cache for proximity checks, avoids re-querying the DOM every frame
+  });
+
+  /* ============================= DIALOG RENDERING ============================= */
+  function showDialog(title, content) {
+    const infoTitle = document.getElementById('info-title');
+    const infoContent = document.getElementById('info-content');
+    infoTitle.textContent = title;
+    infoContent.innerHTML = '';
+
+    content.forEach(block => {
+      let element;
+      switch (block.type) {
+        case 'heading2':
+          element = document.createElement('h2');
+          element.textContent = block.text;
+          break;
+        case 'heading3':
+          element = document.createElement('h3');
+          element.textContent = block.text;
+          break;
+        case 'paragraph':
+          element = document.createElement('p');
+          element.textContent = block.text;
+          break;
+        case 'list':
+          element = document.createElement('ul');
+          block.items.forEach(i => {
+            const li = document.createElement('li');
+            li.textContent = i;
+            element.appendChild(li);
+          });
+          break;
+        case 'ordered_list':
+          element = document.createElement('ol');
+          block.items.forEach(i => {
+            const li = document.createElement('li');
+            li.textContent = i;
+            element.appendChild(li);
+          });
+          break;
+        case 'link':
+          element = document.createElement('a');
+          element.href = block.href;
+          element.target = '_blank';
+          element.rel = 'noopener noreferrer';
+          element.textContent = block.text;
+          break;
+        default:
+          element = document.createElement('p');
+          element.textContent = block.text || 'Invalid content type';
+      }
+      infoContent.appendChild(element);
+    });
+
+    infoDialog.style.display = 'block';
+  }
+
+  function closeDialog() {
+    infoDialog.style.display = 'none';
+  }
+  closeButton.onclick = closeDialog;
+
+  /* ============================= MOVEMENT (smooth, key-state based) ============================= */
+  const keys = { ArrowUp: false, ArrowDown: false, ArrowLeft: false, ArrowRight: false };
+
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') { closeDialog(); return; }
+    if (e.key === 'Enter' && nearbyItem) { showDialog(nearbyItem.title, nearbyItem.content); return; }
+    if (e.key in keys) { keys[e.key] = true; e.preventDefault(); }
+  });
+  document.addEventListener('keyup', (e) => {
+    if (e.key in keys) { keys[e.key] = false; }
+  });
+
+  // Touch controls mirror the same key-state object
+  function bindHold(btnId, key) {
+    const btn = document.getElementById(btnId);
+    const start = (e) => { e.preventDefault(); keys[key] = true; };
+    const end = (e) => { e.preventDefault(); keys[key] = false; };
+    btn.addEventListener('touchstart', start, { passive: false });
+    btn.addEventListener('touchend', end);
+    btn.addEventListener('touchcancel', end);
+    btn.addEventListener('mousedown', start);
+    btn.addEventListener('mouseup', end);
+    btn.addEventListener('mouseleave', end);
+  }
+  bindHold('btn-up', 'ArrowUp');
+  bindHold('btn-down', 'ArrowDown');
+  bindHold('btn-left', 'ArrowLeft');
+  bindHold('btn-right', 'ArrowRight');
+  document.getElementById('btn-interact').addEventListener('click', () => {
+    if (nearbyItem) showDialog(nearbyItem.title, nearbyItem.content);
+  });
+
+  function gameLoop() {
+    const speed = Math.max(2.5, gameArea.offsetWidth * 0.006);
+    const maxX = gameArea.offsetWidth - player.offsetWidth;
+    const maxY = gameArea.offsetHeight - player.offsetHeight;
+
+    let dx = 0, dy = 0;
+    if (keys.ArrowLeft) dx -= 1;
+    if (keys.ArrowRight) dx += 1;
+    if (keys.ArrowUp) dy -= 1;
+    if (keys.ArrowDown) dy += 1;
+
+    const moving = dx !== 0 || dy !== 0;
+
+    if (moving) {
+      // normalize so diagonal movement isn't faster
+      const len = Math.hypot(dx, dy) || 1;
+      playerX = Math.min(maxX, Math.max(0, playerX + (dx / len) * speed));
+      playerY = Math.min(maxY, Math.max(0, playerY + (dy / len) * speed));
+
+      if (dx < 0) facing = 'left';
+      else if (dx > 0) facing = 'right';
+    }
+
+    player.classList.toggle('walking', moving);
+    const charGroup = player.querySelector('.char');
+    if (charGroup) charGroup.classList.toggle('facing-left', facing === 'left');
+
+    player.style.left = playerX + 'px';
+    player.style.top = playerY + 'px';
+
+    updateProximity();
+    requestAnimationFrame(gameLoop);
+  }
+
+  function updateProximity() {
+    const playerRect = player.getBoundingClientRect();
+    const playerCenterX = playerRect.left + playerRect.width / 2;
+    const playerCenterY = playerRect.top + playerRect.height / 2;
+
+    let found = null;
+    items.forEach(item => {
+      const r = item._el.getBoundingClientRect();
+      const dist = Math.hypot(
+        playerCenterX - (r.left + r.width / 2),
+        playerCenterY - (r.top + r.height / 2)
+      );
+      const threshold = Math.max(90, r.width * 0.7);
+      if (dist < threshold) {
+        found = item;
+        item._el.classList.add('nearby');
+      } else {
+        item._el.classList.remove('nearby');
+      }
+    });
+
+    nearbyItem = found;
+    interactionHint.style.display = nearbyItem ? 'block' : 'none';
+  }
+
+  requestAnimationFrame(gameLoop);
+</script>
+</body>
+</html>
